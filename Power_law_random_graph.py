@@ -87,24 +87,29 @@ savefig('plrg.png')
 # Generate graph with degree dist. following the power law generated above 
 ##########
 graph = nx.Graph()
+degrees = list()
 #populate the graph with all the nodes so edges can be added
 for x in xdata:
     graph.add_node(x)
-#add number of edges to each node according to PL dist. where each edge has an equal probability of being added (edges can only exist once in networkx i.e only 1 edge between 2 nodes) 
-int_sum = 0
-for x in xdata:
     #Can assume this always works because each element in xdata is distinct (if its ever not its gonna break)
     num_arcs = ydata[np.where(xdata == x)]
     num_arcs_ceiling = int(ceil(num_arcs[0]))
-    int_sum += num_arcs_ceiling
-    #print(x, num_arcs_ceiling)
-    for i in range(0, num_arcs_ceiling):
+    degrees.append([x, num_arcs_ceiling])
+print(degrees)
+#add number of edges to each node according to PL dist. where each edge has an equal probability of being added (edges can only exist once in networkx i.e only 1 edge between 2 nodes) 
+int_sum = 0
+index = 0
+for x in xdata:
+    max_degree = degrees[index][1]
+    index += 1
+    for i in range(0, max_degree):
         rand_node = x
         while(rand_node == x):
             rand_node = random.randint(1, num_points)
-        #print(x, ':', rand_node)
-        graph.add_edge(x, rand_node)
+        if(graph.degree(rand_node) < degrees[rand_node - 1][1]):
+            print(x, ': ', rand_node)
+            graph.add_edge(x, rand_node)
         
-print(graph.number_of_nodes(), graph.number_of_edges(), int_sum - graph.number_of_edges())
+print(graph.number_of_nodes(), graph.number_of_edges())
 nx.write_graphml(graph, 'graph.xml') 
     
