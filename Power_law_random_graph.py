@@ -13,7 +13,7 @@ powerlaw = lambda x, amp, index: amp * (x**index)
 # Generate data points with noise
 ##########
 #num_points will correspind to the number of nodes in the graph
-num_points = 20
+num_points = 10
 # Note: all positive, non-zero data
 # Array of integers from 1 to the number of points
 xdata = linspace(1, num_points, num_points).astype(int)
@@ -68,7 +68,7 @@ ampErr = sqrt( covar[1][1] ) * amp
 clf()
 subplot(2, 1, 1)
 plot(xdata, powerlaw(xdata, amp, index))     # Power_Law fit line
-#errorbar(xdata, ydata, yerr=yerr, fmt='k.')  # Original data with error bar (really hard to see for large number of nodes)
+errorbar(xdata, ydata, yerr=yerr, fmt='k.')  # Original data with error bar (really hard to see for large number of nodes)
 title('Best Fit Power Law')
 xlabel('X')
 ylabel('Y')
@@ -82,6 +82,7 @@ ylabel('Y (log scale)')
 xlim(1.0, num_points)
 
 savefig('plrg.png')
+plt.clf()
 
 ##########
 # Generate graph with degree dist. following the power law generated above 
@@ -95,7 +96,7 @@ for x in xdata:
     num_arcs = ydata[np.where(xdata == x)]
     num_arcs_ceiling = int(ceil(num_arcs[0]))
     degrees.append([x, num_arcs_ceiling])
-print(degrees)
+#print(degrees)
 #add number of edges to each node according to PL dist. where each edge has an equal probability of being added (edges can only exist once in networkx i.e only 1 edge between 2 nodes) 
 int_sum = 0
 index = 0
@@ -104,12 +105,16 @@ for x in xdata:
     index += 1
     for i in range(0, max_degree):
         rand_node = x
+        #no self loops plz
         while(rand_node == x):
             rand_node = random.randint(1, num_points)
+        #only attach the node if there is "space" on the other node - this may lead to some nodes not reaching their max_degree
         if(graph.degree(rand_node) < degrees[rand_node - 1][1]):
-            print(x, ': ', rand_node)
+            #print(x, ': ', rand_node)
             graph.add_edge(x, rand_node)
         
-print(graph.number_of_nodes(), graph.number_of_edges())
+#print(graph.number_of_nodes(), graph.number_of_edges())
 nx.write_graphml(graph, 'graph.xml') 
+nx.draw_circular(graph)
+savefig('graph.png')
     
